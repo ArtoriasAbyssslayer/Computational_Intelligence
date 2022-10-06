@@ -3,58 +3,59 @@
 %% Sugeno TSK RegressionTask 2 - ANFIS
 clc
 clear all
+close all 
 format compact
 disp("Starting Tsk on high-dimensonallity dataset");
 
 %Load and preproccess data 
 
 data = csvread('./datasets/superconduct/train.csv',1,0);
-data = normalize(data);
-preproc = 1;
-[trainData,validationData,testData] = split_scale(data,preproc);
+
+%Split and suffle data
+idx=randperm(length(data));
+trnIdx=idx(1:round(length(idx)*0.6));
+chkIdx=idx(round(length(idx)*0.6)+1:round(length(idx)*0.8));
+tstIdx=idx(round(length(idx)*0.8)+1:end);
+trainData=data(trnIdx,1:end-1);
+validationData=data(chkIdx,1:end-1);
+testData=data(tstIdx,1:end-1);
+trainData = normalize(trainData);
 %Cost/evaluation function 
 Rsq = @(ypred,y) 1-sum((ypred-y).^2)/sum((y-mean(y)).^2);
 
 
 %% Grid Search 
-% I define a 10 by 10 by 2 matrix Params from which numberoffeature and clustering
+% I define a 6by 7 by 2 matrix Params from which numberoffeature and clustering
 % radius will be selected
 %% Number of  Features Params
-Params(1,1) = 2; 
-Params(2,1) = 5;
-Params(3,1) = 10; 
-Params(4,1) = 12;
-Params(5,1) = 15;
-Params(6,1) = 20;
-Params(7,1) = 25;
-Params(8,1) = 30;
-Params(9,1) = 35;
-Params(10,1)= 40;
+Params(1,1) = 5;
+Params(2,1) = 10; 
+Params(3,1) = 15;
+Params(4,1) = 20;
+Params(5,1) = 25;
+Params(6,1) = 30;
 %% Clustering Radius Params
-Params(:,1,2) = 0.1;
-Params(:,2,2) = 0.2;
-Params(:,3,2) = 0.3;
-Params(:,4,2) = 0.4;
-Params(:,5,2) = 0.5;
-Params(:,6,2) = 0.6;
-Params(:,7,2) = 0.7;
-Params(:,8,2) = 0.8;
-Params(:,9,2) = 0.9;
+Params(:,1,2) = 0.3;
+Params(:,2,2) = 0.4;
+Params(:,3,2) = 0.5;
+Params(:,4,2) = 0.6;
+Params(:,5,2) = 0.7;
+Params(:,6,2) = 0.8;
+Params(:,7,2) = 0.9;
 fprintf("\nFeature Selection Params %d",Params(:,1)')
 fprintf("\n Clusterring Radius Selection Params %4f \n ",Params(1,:,2));
 
 %% errors in grid buffer
-error_grid = zeros(size(Params,1),size(Params,2));
+error_grid = zeros(size(Params,1),size(Params,2),2);
 rule_grid = zeros(size(Params,1),size(Params,2));
 %% CrossValidationDataSplit
 k = 5;
 %% Grid Search
 % start counting time too 
 tic 
-disp("Beginning Grid Search")
 % Rank Normalized data and get the indeces of ranking in idx array
 [ranking,~] = relieff(data(:,1:end-1),data(:,end),100);
-
+disp("Beginning Grid Search")
 for f = 1:size(Params,1)
     for r = 1:size(Params,2)
         fprintf("\n ---Number of features: %d", Params(f,1));
@@ -69,7 +70,7 @@ for f = 1:size(Params,1)
         % genfis r_a clustering influense range
         opt = genfisOptions('SubtractiveClustering',...
                     'ClusterInfluenceRange',r_a);
-        sc_fis = genfis(trainData(:,ranking(Params(f,1))),trainData(:,end),opt);
+        sc_fis = genfis(trainData(:,ranking(1:numberOfSelectedFeatures)),trainData(:,end),opt);
         rule_grid(f,r) = length(sc_fis.rule);
         if (rule_grid(f, r) == 1 || rule_grid(f,r) > 100) % if there is only one rule we cannot create a fis, so continue to next values
             continue; % or more than 100, continue, for speed reason
@@ -93,13 +94,14 @@ for f = 1:size(Params,1)
             anfisOpt = anfisOptions('InitialFIS', sc_fis, 'EpochNumber', 40, 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0, 'DisplayStepSize', 0, 'DisplayFinalResults', 0, 'ValidationData', [validationDataChunk1  validataionDataChunk2]);
             [trnFis,trnError,~,valFis,valError]=anfis([trainDataChunk1 trainDataChunk2],anfisOpt);
             figure(iter);
-            plot([trnError,valError],'LineWidth',2);grid on;
+            title("Learning Curve ADFIS optim #iter %d",iter)
+            plot([trnError valError],'LineWidth',2); grid on;
             xlabel('# of Iterations'); ylabel('Error');
-            legend('ANFIS CrossVal Data Training');
+            legend('TrainError' ,'ValError');
             disp('CV train end');
 
             %Eval
-            Y = evalfis(validationData(:,ranking(numberOfSelectedFeatures)),valFis);
+            Y = evalfis(validationData(:,ranking(1:Params(f,1))),valFis);
             R_2 =Rsq(Y,validationData(:,end));
             RMSE = sqrt(mse(Y,validationData(:,end)));
             NMSE = 1 - R_2;
@@ -114,33 +116,28 @@ for f = 1:size(Params,1)
 
             figure('Name',"#Iteration PredError-CrossVal");
             % Prediction Error Plot
-             Pred_error_temp(iter,:)= validationData(:,end) - Y;    
-             plot(Pred_error_temp(iter,:),'LineWidth',2); grid on;
-             xlabel('input');ylabel('Error');
-             legend('Prediction Error');
-             title('kfold Prediction Error Iteration #',iter);
+            Pred_error_temp(iter,:)= validationData(:,end) - Y;    
+            plot(Pred_error_temp(iter,:),'LineWidth',2); grid on;
+            xlabel('input');ylabel('Error');
+            legend('Prediction Error');
+            title('kfold Prediction Error Iteration #',iter);
         end
         cross_val_errorR2 = sum(cv_temp_error(:,1))/k;
         cross_val_errorRMSE = sum(cv_temp_error(:,2))/k;
-        error_grid(f,r) = cross_val_errorR2;
-        error_grid(f,r) = cross_val_errorRMSE;
+        error_grid(f,r,1) = cross_val_errorR2;
+        error_grid(f,r,2) = cross_val_errorRMSE;
     end
     r=1;
 end
 % stop counter and print elapsed time for grid search
 toc
-figure;
-subplot(2,2,1)
-bar(error_grid(1,:));
-xlabel('radii value');
-ylabel('Mean Square Error');
-legend('3 features')
-subplot(2,2,2);
-bar(error_grid(2,:));
-xlabel('radii value');
-ylabel('Mean Square Error');
-legend('9 features')
-
-% Select values 
-
-
+bar3(rule_grid);
+ylabel('Number of features');
+yticklabels({'2','5','10','12','15','20','25','30','35','40'});
+xlabel('Radii values');
+xticklabels({'1st','2nd','3rd','4th','5th','6th','7th','8th','9th'});
+zlabel('Number of rules created');
+title('Rules created for different number of features and radii');
+saveas(gcf, 'rules_wrt_f_r.png');
+fprintf("Best Number Of Features: %d, Best Radius %4f")
+disp("Grid Search End");
