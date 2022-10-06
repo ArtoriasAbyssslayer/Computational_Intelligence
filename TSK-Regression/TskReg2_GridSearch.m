@@ -10,30 +10,36 @@ disp("Starting Tsk on high-dimensonallity dataset");
 %Load and preproccess data 
 
 data = csvread('./datasets/superconduct/train.csv',1,0);
-
+% idx=randperm(length(data));
+% trnIdx=idx(1:round(length(idx)*0.6));
+% chkIdx=idx(round(length(idx)*0.6)+1:round(length(idx)*0.8));
+% tstIdx=idx(round(length(idx)*0.8)+1:end);
+% trnX=data(trnIdx,1:end-1);
+% chkX=data(chkIdx,1:end-1);
+% tstX=data(tstIdx,1:end-1);
+% traindata=[trnX data(trnIdx,end)];
+% valata=[chkX data(chkIdx,end)];
+% testata=[tstX data(tstIdx,end)];
+% trainData = normalize(traindata);
+% validationData = normalize(valdata);
+% testData = normalize(testdata);
+% *above method aborted because we want to normalize data based on train
+% set*
 %Split and suffle data
-idx=randperm(length(data));
-trnIdx=idx(1:round(length(idx)*0.6));
-chkIdx=idx(round(length(idx)*0.6)+1:round(length(idx)*0.8));
-tstIdx=idx(round(length(idx)*0.8)+1:end);
-trainData=data(trnIdx,1:end-1);
-validationData=data(chkIdx,1:end-1);
-testData=data(tstIdx,1:end-1);
-trainData = normalize(trainData);
+preproc = 1;
+[trainData,validationData,testData] = split_scale(data,preproc);
 %Cost/evaluation function 
 Rsq = @(ypred,y) 1-sum((ypred-y).^2)/sum((y-mean(y)).^2);
 
 
 %% Grid Search 
-% I define a 6by 7 by 2 matrix Params from which numberoffeature and clustering
+% I define a 4by 7 by 2 matrix Params from which numberoffeature and clustering
 % radius will be selected
 %% Number of  Features Params
-Params(1,1) = 5;
-Params(2,1) = 10; 
-Params(3,1) = 15;
-Params(4,1) = 20;
-Params(5,1) = 25;
-Params(6,1) = 30;
+Params(1,1) = 10;
+Params(2,1) = 15; 
+Params(3,1) = 20;
+Params(4,1) = 25;
 %% Clustering Radius Params
 Params(:,1,2) = 0.3;
 Params(:,2,2) = 0.4;
@@ -42,9 +48,10 @@ Params(:,4,2) = 0.6;
 Params(:,5,2) = 0.7;
 Params(:,6,2) = 0.8;
 Params(:,7,2) = 0.9;
-fprintf("\nFeature Selection Params %d",Params(:,1)')
-fprintf("\n Clusterring Radius Selection Params %4f \n ",Params(1,:,2));
-
+fprintf("\nFeature Selection Params ")
+FeatureParams = Params(:,1)'
+fprintf("\n Clusterring Radius Selection Params %4f \n ");
+RadIIParams = Params(1,:,2)
 %% errors in grid buffer
 error_grid = zeros(size(Params,1),size(Params,2),2);
 rule_grid = zeros(size(Params,1),size(Params,2));
@@ -53,7 +60,8 @@ k = 5;
 %% Grid Search
 % start counting time too 
 tic 
-% Rank Normalized data and get the indeces of ranking in idx array
+% Rank Normalized data and get the indeces of ranking in idx array -
+% Features that have stronger correlation with target val 
 [ranking,~] = relieff(data(:,1:end-1),data(:,end),100);
 disp("Beginning Grid Search")
 for f = 1:size(Params,1)
@@ -93,7 +101,7 @@ for f = 1:size(Params,1)
             disp("Start FIS Training")
             anfisOpt = anfisOptions('InitialFIS', sc_fis, 'EpochNumber', 40, 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0, 'DisplayStepSize', 0, 'DisplayFinalResults', 0, 'ValidationData', [validationDataChunk1  validataionDataChunk2]);
             [trnFis,trnError,~,valFis,valError]=anfis([trainDataChunk1 trainDataChunk2],anfisOpt);
-            figure(iter);
+            figure(iter*5);
             title("Learning Curve ADFIS optim #iter %d",iter)
             plot([trnError valError],'LineWidth',2); grid on;
             xlabel('# of Iterations'); ylabel('Error');
@@ -129,13 +137,14 @@ for f = 1:size(Params,1)
     end
     r=1;
 end
+save error_grid
 % stop counter and print elapsed time for grid search
 toc
 bar3(rule_grid);
 ylabel('Number of features');
-yticklabels({'2','5','10','12','15','20','25','30','35','40'});
+yticklabels({'10','15','20','25'});
 xlabel('Radii values');
-xticklabels({'1st','2nd','3rd','4th','5th','6th','7th','8th','9th'});
+xticklabels({'1st','2nd','3rd','4th','5th','6th','7th'});
 zlabel('Number of rules created');
 title('Rules created for different number of features and radii');
 saveas(gcf, 'rules_wrt_f_r.png');
