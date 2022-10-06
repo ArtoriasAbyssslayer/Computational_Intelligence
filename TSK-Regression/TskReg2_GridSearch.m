@@ -12,9 +12,6 @@ data = csvread('./datasets/superconduct/train.csv',1,0);
 data = normalize(data);
 preproc = 1;
 [trainData,validationData,testData] = split_scale(data,preproc);
-trainData = normalize(trainData);
-validationData = normalize(validationData);
-testData = normalize(testData);
 %Cost/evaluation function 
 Rsq = @(ypred,y) 1-sum((ypred-y).^2)/sum((y-mean(y)).^2);
 
@@ -43,10 +40,9 @@ Params(:,6,2) = 0.6;
 Params(:,7,2) = 0.7;
 Params(:,8,2) = 0.8;
 Params(:,9,2) = 0.9;
-disp("Feature Selection Params %d")
-Params(:,:,1)
-disp("Clusterring Radius Selection Params");
-Params(:,:,2)
+fprintf("\nFeature Selection Params %d",Params(:,1)')
+fprintf("\n Clusterring Radius Selection Params %4f \n ",Params(1,:,2));
+
 %% errors in grid buffer
 error_grid = zeros(size(Params,1),size(Params,2));
 rule_grid = zeros(size(Params,1),size(Params,2));
@@ -57,7 +53,7 @@ k = 5;
 tic 
 disp("Beginning Grid Search")
 % Rank Normalized data and get the indeces of ranking in idx array
-[ranking,weights] = relieff(data(:,1:end-1),data(:,end),100);
+[ranking,~] = relieff(data(:,1:end-1),data(:,end),100);
 
 for f = 1:size(Params,1)
     for r = 1:size(Params,2)
@@ -71,9 +67,9 @@ for f = 1:size(Params,1)
         
         cv_temp_error = zeros(c.NumTestSets,2);
         % genfis r_a clustering influense range
-        opt = genfisOptions('SubtractiveClustering');
-        opt.ClusterInfluenceRange = r_a;
-        sc_fis = genfis(trainData(:,ranking(1:Params(f,1))),trainData(:,end),opt);
+        opt = genfisOptions('SubtractiveClustering',...
+                    'ClusterInfluenceRange',r_a);
+        sc_fis = genfis(trainData(:,ranking(Params(f,1))),trainData(:,end),opt);
         rule_grid(f,r) = length(sc_fis.rule);
         if (rule_grid(f, r) == 1 || rule_grid(f,r) > 100) % if there is only one rule we cannot create a fis, so continue to next values
             continue; % or more than 100, continue, for speed reason
@@ -103,7 +99,7 @@ for f = 1:size(Params,1)
             disp('CV train end');
 
             %Eval
-            Y = evalfis(validationData(:,ranking(1:numberOfSelectedFeatures)),valFis);
+            Y = evalfis(validationData(:,ranking(numberOfSelectedFeatures)),valFis);
             R_2 =Rsq(Y,validationData(:,end));
             RMSE = sqrt(mse(Y,validationData(:,end)));
             NMSE = 1 - R_2;
