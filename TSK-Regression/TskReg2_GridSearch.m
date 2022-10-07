@@ -147,7 +147,7 @@ xlabel('Radii values');
 xticklabels({'1st','2nd','3rd','4th','5th','6th','7th'});
 zlabel('Number of rules created');
 title('Rules created for different number of features and radii');
-saveas(gcf, 'rules_wrt_f_r.png');
+saveas(gcf, 'rule_grid_bar_chart.png');
 % values below selected based on error grid evaluation
 fprintf("\nBest Number Of Features: %d,\n",Params(4,1));
 fprintf("\nBest Radius %4f\n",Params(4,3,2));
