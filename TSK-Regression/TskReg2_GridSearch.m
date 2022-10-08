@@ -137,7 +137,7 @@ for f = 1:size(Params,1)
     end
     r=1;
 end
-save error_grid
+save WorkspaceResultValues
 % stop counter and print elapsed time for grid search
 toc
 bar3(rule_grid);
@@ -146,6 +146,7 @@ yticklabels({'10','15','20','25'});
 xlabel('Radii values');
 xticklabels({'1st','2nd','3rd','4th','5th','6th','7th'});
 zlabel('Number of rules created');
+
 title('Rules created for different number of features and radii');
 saveas(gcf, 'rule_grid_bar_chart.png');
 % values below selected based on error grid evaluation
