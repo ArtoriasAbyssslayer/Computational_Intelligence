@@ -1,3 +1,5 @@
+% Computational Intelligence THMMY AUTH 2022
+% Charis Filis 9449
 clc;clear;
 close all;
 format compact

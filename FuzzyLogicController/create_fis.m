@@ -5,7 +5,8 @@ sets.andMethod = 'min';
 sets.defuzzMethod = 'COA';
 %sets.type = 'mamdani';
 sets.orMethod = 'max';
-
+% This adjustment to ImplicationMethod made later for using Larsen method
+sets.ImplicationMethod = "prod";
 
 A = 1;
 sets = addvar(sets,'input', 'e',[-A,A]);
