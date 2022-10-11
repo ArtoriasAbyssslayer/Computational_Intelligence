@@ -4,6 +4,14 @@ Assignments for computational intelligence and fuzzy systems course of ECE AUTh
 
 ## Requirements 
 Matlab R2021a or later
+
+Python 3.7 or later
+  * Tensorflow
+  * Numpy
+  * Keras Tuner
+  * Keras
+  * Tensorflow_addons
+  * sklearn
 ## Contents
 * ![DC Motor Controlled by Fuzzy Logic Controller](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/FuzzyLogicController)
 * ![TSK Fuzzy Neural Model for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/TSK-Regression)
