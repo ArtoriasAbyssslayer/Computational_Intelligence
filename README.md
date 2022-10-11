@@ -12,6 +12,8 @@ Python 3.7 or later
   * Keras
   * Tensorflow_addons
   * sklearn
+  
+Jupyter-Notebook / Jupyter Lab
 ## Contents
 * ![DC Motor Controlled by Fuzzy Logic Controller](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/FuzzyLogicController)
 * ![TSK Fuzzy Neural Model for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/TSK-Regression)
