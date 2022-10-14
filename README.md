@@ -15,10 +15,10 @@ Python 3.7 or later
   
 Jupyter-Notebook / Jupyter Lab
 ## Contents
-* ![DC Motor Controlled by Fuzzy Logic Controller](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/FuzzyLogicController)
-* ![TSK Fuzzy Neural Model for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/TSK-Regression)
-* ![Multi-Layer Perceptron Model for Classification](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/MultilayerPerceptronClassification)
-* ![RBF-2-Hidden-Layer Network for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/RBF_regression)
+* [DC Motor Controlled by Fuzzy Logic Controller](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/FuzzyLogicController)
+* [TSK Fuzzy Neural Model for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/TSK-Regression)
+* [Multi-Layer Perceptron Model for Classification](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/MultilayerPerceptronClassification)
+* [RBF-2-Hidden-Layer Network for Regression](https://github.com/ArtoriasAbyssslayer/Computational_Inteligence/tree/master/RBF_regression)
 
 ## Warning
 This repository is not fully updated and may have issues
