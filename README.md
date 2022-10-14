@@ -26,4 +26,4 @@ This repository is not fully updated and may have issues
 Please make sure to update tests as appropriate.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](https://github.com/ArtoriasAbyssslayer/Computational_Intelligence/blob/master/LICENSE.md)
